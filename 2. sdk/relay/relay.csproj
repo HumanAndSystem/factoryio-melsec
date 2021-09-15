@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="ActUtlType">
+      <HintPath>C:\MELSEC\Act\Control\ActUtlTypeLib.dll</HintPath>
+    </Reference>
+    <Reference Include="ActSupportMsg">
+      <HintPath>C:\MELSEC\Act\Control\ActSupportMsgLib.dll</HintPath>
+    </Reference>
+    <Reference Include="EngineIO">
+      <HintPath>..\lib\Engine IO.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

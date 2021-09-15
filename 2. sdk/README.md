@@ -84,13 +84,13 @@ Visual Studio가 설치되어 있지 않으므로
 
 우선 프로젝트 하나를 만든다.
 
-```batch
+```dos
 dotnet new console -o acttest
 ```
 
 제대로 됐다면
 
-```batch
+```dos
 cd acttest
 dotnet run
 ```
@@ -187,9 +187,113 @@ The corrective action is as follows:
 Y1000에 대한 코드를 넣어 읽고 쓰기를 확인한다.
 
 ```c#
-var value = actctrl.GetDevice("Y1000");
+int value;
+res = actctrl.GetDevice("Y1000", out value);
 Console.WriteLine("{0}", value);
-actctrl.SetDevice("Y1000", 1);
-value = actctrl.GetDevice("Y1000");
+value = (value == 0 ? 1 : 0);
+actctrl.SetDevice("Y1000", value);
+res = actctrl.GetDevice("Y1000", out value);
 Console.WriteLine("{0}", value);
+```
+
+## SDK
+
+SDK를 시범해볼 프로젝트를 만든다.
+
+```dos
+dotnet new console -o sdktest
+cd sdktest
+```
+
+라이브러리를 다운로드 받아 프로젝트 디렉토리에 넣고,
+참조를 추가한다.
+
+```xml
+  <ItemGroup>
+    <Reference Include="EngineIO">
+      <HintPath>Engine IO.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+```
+
+`Output Address 0`은 `Load Conveyor`다.
+연습은 이 값을 매번 반전시킨다.
+
+```c#
+var conveyor = MemoryMap.Instance.GetBit(0, MemoryType.Output);
+MemoryMap.Instance.Update();
+conveyor.Value = !conveyor.Value;
+MemoryMap.Instance.Update();
+```
+
+```dos
+dotnet run
+```
+
+실행시킬 때마다 `Load Conveyor`가 ON/OFF를 반복하는 것을 확인할 수 있다.
+
+# 중계
+
+Modbus을 매개로 할 때처럼 QPLC의 X/Y/D를 연결시키는 중계 역할을 할 프로그램을 작성할 것이다.
+
+```dos
+dotnet new console -o relay
+cd relay
+```
+
+## 중계 범위 
+
+SDK는 Bit는 512개, 그 밖의 자료형은 256개를 지원한다.
+따라서 `Bit Input`은 X1000에서 X11FF까지와 대응시키고,
+`Bit Output`은 Y1000에서 Y11FF까지 대응시킨다.
+
+그리고 `Int Input`은 D1000에서 D1255까지와 대응시키고,
+`Int Output`은 D2000에서 D2255까지 대응시킨다.
+
+## 이름이 있는 Tag 표시
+
+작성된 중계 프로그램은 중계를 하기 전에
+이름이 있는 Tag를 그 주소와 함께 출력해 준다.
+어느 태그와 어느 디바이스와 연결되는지 확인하는데 도움이 될 것이다.
+
+```
+Input Bit
+    000(000): Start
+    001(001): Stop
+    002(002): Reset
+    003(003): Emergency stop
+    004(004): Manual
+    005(005): At Entry
+    006(006): At Load
+    007(007): At Unload
+    008(008): At Exit
+    009(009): At Left
+    010(00a): At Middle
+    011(00b): At Right
+    012(00c): Moving Z
+    013(00d): Moving X
+    014(00e): Auto
+    496(1f0): FACTORY I/O (Running)
+    497(1f1): FACTORY I/O (Paused)
+    498(1f2): FACTORY I/O (Reset)
+Output Bit
+    000(000): Load Conveyor
+    001(001): Start light
+    002(002): Stop light
+    003(003): Entry Conveyor
+    004(004): Reset light
+    005(005): Exit Conveyor
+    007(007): Emitter
+    008(008): Remover
+    011(00b): Unload Conveyor
+    015(00f): Forks Left
+    016(010): Forks Right
+    017(011): Lift
+    496(1f0): FACTORY I/O (Run)
+    497(1f1): FACTORY I/O (Pause)
+    498(1f2): FACTORY I/O (Reset)
+Input Int
+Output Int
+    000(000): Target Position
+    240(0f0): FACTORY I/O (Camera Position)
 ```

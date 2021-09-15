@@ -28,8 +28,18 @@ namespace acttest
         {
             var actctrl = new ActUtlTypeClass();
             actctrl.ActLogicalStationNumber = 2;
+
             var res = actctrl.Open();
             if (res != 0) throw new ActError(res);
+
+            int value;
+            res = actctrl.GetDevice("Y1000", out value);
+            Console.WriteLine("{0}", value);
+            value = (value == 0 ? 1 : 0);
+            actctrl.SetDevice("Y1000", value);
+            res = actctrl.GetDevice("Y1000", out value);
+            Console.WriteLine("{0}", value);
+
             res = actctrl.Close();
             if (res != 0) throw new ActError(res);
         }
