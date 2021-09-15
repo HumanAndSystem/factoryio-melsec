@@ -27,7 +27,7 @@ Tag는 `memory mapped file`을 통해 읽고 쓸 수 있다.
 `Memory`는 일반 데이터 교환용이라고 설명하고 있지만, 딱히 어떤 쓸모가 있는지는 잘 모르겠다.
 
 전체 `memory mapped file`은 `MemoryMap`이라는 클래스로 정의되었고,
-`MemoryMap.Instance`로 통해 접근하는 싱글톤 패턴으로 되어 있다.
+`MemoryMap.Instance`를 통해 접근하는 싱글톤 패턴으로 되어 있다.
 
 실제 읽고 쓰기는 `MemoryMap.Instance.Update` 할 때 이루어진다.
 즉, `Update`를 호출한 시점에 `Input`의 값들은 읽혀서 복사본으로 저장되고,
