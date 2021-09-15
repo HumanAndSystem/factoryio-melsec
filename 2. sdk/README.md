@@ -69,3 +69,127 @@ rollerConveyor.Value = true;
 ```c#
 MemoryMap.Instance.Update();
 ```
+
+# 시범
+
+## MX-Component
+
+SDK가 .NET 라이브러리를 제공하므로 이를 중계하려면
+MX-Component를 다루는데도 .NET 언어를 사용해야 한다.
+C#을 사용할 것이다.
+
+Visual Studio가 설치되어 있지 않으므로
+[Build Tools](https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=BuildTools)의 .NET SDK만으로 시범을 진행할 것이다.
+좀 더 가볍게 접근한다면 [.NET SDK](https://dotnet.microsoft.com/download)만으로도 충분할 것이다.
+
+우선 프로젝트 하나를 만든다.
+
+```batch
+dotnet new console -o acttest
+```
+
+제대로 됐다면
+
+```batch
+cd acttest
+dotnet run
+```
+
+컴파일을 거친 후
+화면에 'Hello World!'가 출력될 것이다.
+
+### 32비트 프로그램
+
+MX-Component4는 32비트 프로그램만을 지원하므로 `PlatformTarget`을 `x86`으로 바꾼다.
+
+`acttest.csproj` 파일을 열어서
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+</Project>
+```
+
+```xml
+<PlatformTarget>x86</PlatformTarget>
+```
+
+을 추가해 준다.
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+
+</Project>
+```
+
+### COM 라이브러리 참조 추가
+
+MX-Component는 COM 라이브러리이므로 C#에서 사용하려면 포장(Wrap) 라이브러리의 참조가 필요하다.
+
+역시 `acttest.csproj` 파일을 열어서
+
+```xml
+  <ItemGroup>
+    <Reference Include="ActUtlType">
+      <HintPath>C:\MELSEC\Act\Control\ActUtlTypeLib.dll</HintPath>
+    </Reference>
+    <Reference Include="ActSupportMsg">
+      <HintPath>C:\MELSEC\Act\Control\ActSupportMsgLib.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+```
+
+두 개의 참조를 추가해 준다.
+
+### 읽고 쓰기 연습
+
+Y1000의 값을 읽고 쓰면서 변화를 확인할 것이다.
+
+```c#
+var actctrl = new ActUtlTypeClass();
+actctrl.ActLogicalStationNumber = 2;
+```
+
+`Logical Station Number`를 2로 설정한다.
+미리 `Communication Setup Utility`로 설정되어 있어야 한다.
+
+```c#
+res = actctrl.Open();
+// ....
+res = actctrl.Close();
+```
+
+Simulator2와의 연결했다가 받는다.
+마찬가지로 미리 GX Works2에서 `Start/Stop Simulation`으로 Simulator를 실행시켜 둬야 한다.
+아니면 에러가 발생한다.
+
+```
+Unhandled exception. acttest.ActError: GX Simulator2 unstart error
+GX Simulator2 did not start.
+The corrective action is as follows:
+ Start GX Simulator2.
+
+<ErrorCode:1809001[Hex]>
+```
+
+최종적으로 `Open`과 `Close` 사이에
+Y1000에 대한 코드를 넣어 읽고 쓰기를 확인한다.
+
+```c#
+var value = actctrl.GetDevice("Y1000");
+Console.WriteLine("{0}", value);
+actctrl.SetDevice("Y1000", 1);
+value = actctrl.GetDevice("Y1000");
+Console.WriteLine("{0}", value);
+```
